@@ -6,6 +6,7 @@ from PIL import Image
 from math import sqrt
 import configparser
 from functools import partial
+from threading import Thread
 
 def sign(num):
     return -1 if num < 0 else 1
@@ -18,7 +19,7 @@ x=30;
 y=30;
 res=0;
 enec=1;
-
+ex_flag=0
 types=dict()
 
 root = Tk()
@@ -101,9 +102,8 @@ class unit:
   ptime=0
   
   def update(self):
-    global canvas;global res
-    self.img=Image.open(self.fname+'.png')
-    self.fimg=ImageTk.PhotoImage(self.img)
+    global res
+    
     if(self.vel>0 and self.vlc==self.vel):
       self.xold+=min((abs(self.xold-self.xn)),1)*sign(self.xold-self.xn)*-1
       self.yold+=min((abs(self.yold-self.yn)),1)*sign(self.yold-self.yn)*-1
@@ -140,11 +140,16 @@ class unit:
             e.hp+=self.heal
             if(e.hp>e.maxhp):
               e.hp=e.maxhp
+    
+    
+  def draw(self):
+    global canvas
+    self.img=Image.open(self.fname+'.png')
+    self.fimg=ImageTk.PhotoImage(self.img)
     canvas.create_rectangle(self.xold-10,self.yold-20,self.xold+self.hp-10,self.yold-25,fill='green')
     if(len(self.l)>0):
       canvas.create_rectangle(self.xold-10,self.yold-30,self.xold+len(self.l)*5-10,self.yold-35,fill='blue')
     canvas.create_image(self.xold,self.yold,image=self.fimg)
-    
     
   def readF(self):
     global config
@@ -260,24 +265,57 @@ def b3(event):
         if(types[i]=='bomb'):
           buildmenu.add_command(label=i,command=partial(product,i))
   
+
+
+
 def ml():
-  global res
-  c=0
-  canvas.delete("all")
-  for i in units:
-    i.update()
-    if(i.hp<0):
-      units.remove(i)
-    if(i.fname=='base'):
-      c+=1
-  if(c==0):
-    exit()
-  ai()
-  l1['text']=res
-  root.update()
-  sleep(0.01)
+  global ex_flag
+  while(1):
+    c=0
+    
+    for i in units:
+      i.update()
+      if(i.hp<0):
+        units.remove(i)
+      if(i.fname=='base'):
+        c+=1
+    if(c==0):
+      ex_flag=1
+    if(ex_flag==1):
+      return
+    ai()
+    sleep(0.01)
+
+thread1 = Thread(target=ml, name='think')
 
 
+def on_closing():
+  global ex_flag
+  print('1 exit')
+  ex_flag=1
+  thread1.join()
+  print('exit')
+  root.quit()
+  exit()
+
+def gui():
+  global canvas;global res;global l1
+  global ex_flag
+  while(1):
+    canvas.delete("all")
+    for i in units:
+      i.draw()
+      
+    l1['text']=res
+    root.update()
+    if(ex_flag==1):
+      print('2 exit')
+      ex_flag=1
+      thread1.join()
+      root.quit()
+      exit()
+      
+  
 sel=0
 
 mainmenu.add_cascade(label="product", menu=prodmenu)
@@ -291,16 +329,18 @@ root.bind('<Motion>', b2)
 
 root.bind('<Button-3>', b3)
 
-
+thread1.start()
 
 for i in config.sections():
   types[i]=config.get(i,'type')
-
+root.protocol("WM_DELETE_WINDOW", on_closing)
+gui()
+"""
 while(1):
  
 
-  ml()
+  ml()"""
 
-root.mainloop()
 
+thread1.join()
 
