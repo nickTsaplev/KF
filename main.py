@@ -61,7 +61,7 @@ def make(typea,x1,y2):
 		res-=int(config.get(typea, "cost"))
 
 def spenemy():
-	global enec
+	global enec;global root
 	for i in range(enec):
 		smake('enemy',300,300-i*30,1)
 	smake('boss',400,400,1)
@@ -69,6 +69,7 @@ def spenemy():
 		smake('e_art',400,400-i*30,1)
 		
 	enec+=1
+	root.after(10000,spenemy)
 
 def product(typea):
 	global sel;global units
@@ -309,18 +310,17 @@ def ml():
 		
 		for i in units:
 			i.update()
-			if(i.fname=='base'):
-				c+=1
-		if(len(units)>0):
-			for i in range(0,len(units)-1):
-				if(units[i].hp<0):
-					canvas.delete(units[i].sprite)
-					canvas.delete(units[i].hpr)
-					if(len(units[i].l)>0):
-						canvas.delete(units[i].lpr)
-					del units[i]
-					
 			
+			if(i.fname=='base' and i.hp>0):
+				c+=1
+			if(i.hp<0):
+				canvas.delete(i.sprite)
+				canvas.delete(i.hpr)
+				if(len(i.l)>0):
+					canvas.delete(i.lpr)
+				del i
+			
+
 		if(c==0):
 			ex_flag=1
 		if(ex_flag==1):
