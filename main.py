@@ -71,7 +71,6 @@ def emake(typea,x1,y2):
 	units[len(units)-1].yold=y2;units[len(units)-1].yn=y2
 	units[len(units)-1].xold=x1;units[len(units)-1].xn=x1
 	units[len(units)-1].attach(typea)
-	print('OK')
 
 def spenemy():
 	global enec;global root;global units;global config
@@ -255,13 +254,13 @@ class unit:
 def load():
 	for e in units:
 		if(e.isenemy==units[sel].isenemy and units[sel].isenemy==0 and len2d(units[sel].xold,units[sel].yold,e.xold,e.yold)<25):
-				if(len(e.l)<e.load and e.load>0 and units[sel]!=e):
-					e.l.append(units[sel])
-					units[sel].tod=1
-							
-					e.dl()
-					print('a')
-					break
+			if(len(e.l)<e.load and e.load>0 and units[sel]!=e):
+				e.l.append(units[sel])
+				units[sel].tod=1
+						
+				e.dl()
+				print('a')
+				break
 
 def unload():
 	for e in units[sel].l:
