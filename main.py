@@ -152,11 +152,12 @@ class unit:
 	def update(self):
 		global res;global canvas;global e_res
 		if(self.vel>0 and self.vlc==self.vel):
-			self.xold+=min((abs(self.xold-self.xn)),1)*sign(self.xold-self.xn)*-1
-			self.yold+=min((abs(self.yold-self.yn)),1)*sign(self.yold-self.yn)*-1
 			canvas.move(self.sprite,min((abs(self.xold-self.xn)),1)*sign(self.xold-self.xn)*-1,min((abs(self.yold-self.yn)),1)*sign(self.yold-self.yn)*-1)
 			canvas.move(self.lpr,min((abs(self.xold-self.xn)),1)*sign(self.xold-self.xn)*-1,min((abs(self.yold-self.yn)),1)*sign(self.yold-self.yn)*-1)
 			canvas.move(self.hpr,min((abs(self.xold-self.xn)),1)*sign(self.xold-self.xn)*-1,min((abs(self.yold-self.yn)),1)*sign(self.yold-self.yn)*-1)
+			self.xold+=min((abs(self.xold-self.xn)),1)*sign(self.xold-self.xn)*-1
+			self.yold+=min((abs(self.yold-self.yn)),1)*sign(self.yold-self.yn)*-1
+			
 			
 			self.vlc=0
 		if(self.vel>0):
