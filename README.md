@@ -1,5 +1,5 @@
 # KF
-Tactical RTS game
+Tactical RTS game.
 This game needs 
   - ImageTK
   - PIL
