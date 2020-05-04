@@ -9,10 +9,7 @@ load=0
 can=
 interested=
 type=people
-win=0
 
-[all]
-enemy=enemy,boss	
 
 [soldier]
 velocity=2
@@ -90,7 +87,7 @@ cost=200
 can=worker
 type=building
 time=10
-gtime=25
+gtime=5
 
 [barraks]
 hp=20
@@ -98,13 +95,6 @@ cost=300
 can=soldier,fireman,medic,worker2
 type=building
 time=10
-
-[win]
-hp=1
-cost=1000
-type=building
-time=1000
-win=1
 
 [factory]
 hp=20
@@ -157,7 +147,7 @@ time=2
 velocity=2
 hp=10
 cost=100
-can=base,mine,factory,turrel,bomb,academy,factory2,barraks,win
+can=base,mine,factory,turrel,bomb,academy,factory2,barraks
 time=4
 
 [mine]
@@ -166,7 +156,7 @@ gains=1
 cost=100
 gtime=2
 type=building
-time=50
+time=10
 
 [bomb]
 hp=20
@@ -189,58 +179,26 @@ range=50
 velocity=2
 hp=10
 damage=1
-cost=100
+cost=0
 range=40
 interested=base
 type=enemy
-time=100
+time=0
 
 [boss]
-velocity=8
+velocity=4
 hp=100
 damage=4
-cost=500
+cost=0
 range=25
 interested=base
 type=enemy
-time=200
-
-[e_base]
-hp=10
-cost=0
-range=100
-damage=10
-time_recharge=10
-type=enemy
-gains=1
-gtime=50
-can=enemy
-time=0
-
-[boss_s]
-hp=20
-cost=0
-range=100
-damage=20
-time_recharge=10
-type=enemy
-can=boss
-time=0
-
-[e_art_s]
-hp=20
-cost=0
-range=100
-damage=20
-time_recharge=10
-type=enemy
-can=e_art
 time=0
 
 [e_art]
 velocity=5
 hp=10
-cost=250
+cost=0
 range=150
 damage=10
 time_recharge=50

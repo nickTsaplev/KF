@@ -11,8 +11,8 @@ import configparser
 from functools import partial
 
 def sign(num):
-		return -1 if num < 0 else 1
-		
+	return -1 if num < 0 else 1
+
 		
 def len2d(x1,y1,x2,y2):
 	return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
@@ -20,9 +20,11 @@ def len2d(x1,y1,x2,y2):
 x=30;
 y=30;
 res=0;
+
+e_res=0;
 enec=1;
 ex_flag=0
-types=dict()
+
 
 root = Tk()
 root.geometry('500x500')
@@ -34,6 +36,7 @@ l1=Label(fg="#eee", bg="#333")
 l1.place(x=0,y=0)
 
 units=list()
+
 sel=0
 
 root.update()
@@ -59,22 +62,55 @@ def make(typea,x1,y2):
 		units[len(units)-1].xold=x1;units[len(units)-1].xn=x1
 		units[len(units)-1].attach(typea)
 		res-=int(config.get(typea, "cost"))
+		
+		
+def emake(typea,x1,y2):
+	global config;global e_res;global sel;global units
+	units.append(unit())
+	units[len(units)-1].isenemy=1
+	units[len(units)-1].yold=y2;units[len(units)-1].yn=y2
+	units[len(units)-1].xold=x1;units[len(units)-1].xn=x1
+	units[len(units)-1].attach(typea)
+	print('OK')
 
 def spenemy():
-	global enec;global root
+	global enec;global root;global units;global config
+	global e_res
+	cost=0
+	'''
 	for i in range(enec):
 		smake('enemy',300,300-i*30,1)
-	smake('boss',400,400,1)
+	
+	if(enec>2):
+		smake('boss',400,400,1)
 	for i in range(int(round((enec/6)))):
 		smake('e_art',400,400-i*30,1)
 		
 	enec+=1
-	root.after(10000,spenemy)
+	'''
+	for i in units:
+		if(config.get(i.fname, "type")=='enemy' and i.rq==''):
+			for j in (config.get(i.fname, "can").split(',')):
+				if(j!=''):
+					cost+=int(config.get(j, "cost"))
+	if(e_res>cost):
+	
+		for i in units:
+			if(config.get(i.fname, "type")=='enemy' and i.rq==''):
+				for j in (config.get(i.fname, "can").split(',')):
+					if(j!='' and i.rq==''):
+						i.product(j)
+						e_res-=int(config.get(j, "cost"))
+						break
+		
+
 
 def product(typea):
-	global sel;global units
+	global units;global sel
 	units[sel].product(typea)
-	spenemy()
+	
+
+	
 	
 class unit:
 	xn=30
@@ -86,6 +122,7 @@ class unit:
 	vel=1
 	vlc=0
 	
+	tod=0
 	
 	gains=0
 	gtime=0
@@ -94,7 +131,8 @@ class unit:
 	rech=0
 	trech=1
 	range=0
-	
+
+	win=0
 	
 	l=list()
 	load=0
@@ -113,14 +151,12 @@ class unit:
 	ptime=0
 	
 	def update(self):
-		global res;global canvas
-		
+		global res;global canvas;global e_res
 		if(self.vel>0 and self.vlc==self.vel):
 			self.xold+=min((abs(self.xold-self.xn)),1)*sign(self.xold-self.xn)*-1
 			self.yold+=min((abs(self.yold-self.yn)),1)*sign(self.yold-self.yn)*-1
 			canvas.move(self.sprite,min((abs(self.xold-self.xn)),1)*sign(self.xold-self.xn)*-1,min((abs(self.yold-self.yn)),1)*sign(self.yold-self.yn)*-1)
-			if(len(self.l)>0):
-				canvas.move(self.lpr,min((abs(self.xold-self.xn)),1)*sign(self.xold-self.xn)*-1,min((abs(self.yold-self.yn)),1)*sign(self.yold-self.yn)*-1)
+			canvas.move(self.lpr,min((abs(self.xold-self.xn)),1)*sign(self.xold-self.xn)*-1,min((abs(self.yold-self.yn)),1)*sign(self.yold-self.yn)*-1)
 			canvas.move(self.hpr,min((abs(self.xold-self.xn)),1)*sign(self.xold-self.xn)*-1,min((abs(self.yold-self.yn)),1)*sign(self.yold-self.yn)*-1)
 			
 			self.vlc=0
@@ -129,13 +165,21 @@ class unit:
 		
 		if(self.gains>0):
 			if(self.gc==0):
-				res=res+self.gains
+				if(self.isenemy==0):
+					res=res+self.gains
+				else:
+					e_res=e_res+self.gains
 				self.gc=self.gtime
 			else:
 				self.gc-=1
 		
 		if(self.ptime<0 and self.rq!=''):
-			make(self.rq,self.xold+30,self.yold+30)
+			
+			if(self.isenemy==0):
+				make(self.rq,self.xold+30,self.yold+30)
+			else:
+				
+				emake(self.rq,self.xold+30,self.yold+30)
 			self.rq=''
 		elif(self.rq!=''):
 			self.ptime-=1
@@ -171,15 +215,17 @@ class unit:
 		global canvas
 		self.img=Image.open(self.fname+'.png')
 		self.fimg=ImageTk.PhotoImage(self.img)
-		self.hpr=canvas.create_rectangle(self.xold-10,self.yold-20,self.xold+self.hp-10,self.yold-25,fill='green')
-		if(len(self.l)>0):
-			self.lpr=canvas.create_rectangle(self.xold-10,self.yold-30,self.xold+len(self.l)*5-10,self.yold-35,fill='blue')
 		canvas.delete(self.sprite)
+		canvas.delete(self.hpr)
+		canvas.delete(self.lpr)
+		self.hpr=canvas.create_rectangle(self.xold-10,self.yold-20,self.xold+self.hp-10,self.yold-25,fill='green')
+		self.lpr=canvas.create_rectangle(self.xold-10,self.yold-30,self.xold+len(self.l)*5-10,self.yold-35,fill='blue')
+		
 		self.sprite=canvas.create_image(self.xold,self.yold,image=self.fimg)
 		
 	def readF(self):
 		global config
-		
+		self.win=int(config.get(self.fname,"win"))
 		self.vel=int(config.get(self.fname, "velocity"))
 		self.hp=int(config.get(self.fname, "hp"))
 		self.maxhp=int(config.get(self.fname, "hp"))
@@ -189,6 +235,7 @@ class unit:
 		self.load=int(config.get(self.fname, "load"))
 		if(self.gains>0):
 			self.gtime=int(config.get(self.fname, "gtime"))
+
 		self.range=int(config.get(self.fname, "range"))
 		self.trech=int(config.get(self.fname, "time_recharge"))
 	def attach(self,filen):
@@ -200,6 +247,7 @@ class unit:
 	
 	
 	def product(self,typea):
+		
 		self.rq=typea
 		self.ptime=int(config.get(typea, "time"))
 		
@@ -209,7 +257,8 @@ def load():
 		if(e.isenemy==units[sel].isenemy and units[sel].isenemy==0 and len2d(units[sel].xold,units[sel].yold,e.xold,e.yold)<25):
 				if(len(e.l)<e.load and e.load>0 and units[sel]!=e):
 					e.l.append(units[sel])
-					units.remove(units[sel])
+					units[sel].tod=1
+							
 					e.dl()
 					print('a')
 					break
@@ -217,8 +266,12 @@ def load():
 def unload():
 	for e in units[sel].l:
 		units.append(e)
+		units[len(units)-1].tod=0
 		units[len(units)-1].yold=units[sel].yold+30;units[len(units)-1].yn=units[sel].yold+30
 		units[len(units)-1].xold=units[sel].xold+30;units[len(units)-1].xn=units[sel].xold+30
+		units[len(units)-1].draw()
+		
+	print('b')	
 	units[sel].l.clear()
 	units[sel].dl()
 
@@ -236,6 +289,7 @@ def ai():
 					else:
 						i.xn=j.xn
 						i.yn=j.yn
+	spenemy()
 
 
 
@@ -243,11 +297,18 @@ def ai():
 
 res=1000
 for i in range(4):
-	smake('soldier',i*20+30,30)
+	smake('soldier',i*20+50,50)
 
-smake('base',100,200)
+smake('base',10,20)
 
-smake('worker',200,200)
+smake('worker',200,20)
+
+smake('e_art_s',400,200,1)
+smake('e_art_s',200,400,1)
+smake('e_base',300,300,1)
+smake('e_base',300,400,1)
+smake('e_base',400,300,1)
+smake('boss_s',400,400,1)
 #smake('enemy',300,300,1)
 res=0
 
@@ -314,19 +375,26 @@ def ml():
 			if(i.fname=='base' and i.hp>0):
 				c+=1
 			if(i.hp<0):
+				
+				i.tod=1
+			else:
+				if(i.win==1):
+					print("YOU WIN!")
+					ex_flag=1
+		for i in units:
+			if(i.tod==1):
 				canvas.delete(i.sprite)
 				canvas.delete(i.hpr)
-				if(len(i.l)>0):
-					canvas.delete(i.lpr)
-				del i
-			
-
+				canvas.delete(i.lpr)
+				units.remove(i)
+																
 		if(c==0):
 			ex_flag=1
+			print("GAME OVER")
 		if(ex_flag==1):
 			return
 		ai()
-		l1['text']=res
+		l1['text']=str(res)+' '+str(e_res)
 		root.update()
 		sleep(0.005)
 
@@ -350,9 +418,9 @@ root.bind('<Motion>', b2)
 
 root.bind('<Button-3>', b3)
 
-for i in config.sections():
-	types[i]=config.get(i,'type')
+
 root.protocol("WM_DELETE_WINDOW", on_closing)
+spenemy()
 ml()
 
 
