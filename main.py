@@ -354,33 +354,38 @@ def b3(event):
 		for i in ll:
 			if(i!=''):
 				if(types[i]=='building'):
-					buildmenu.add_command(label=i,command=partial(product,i))
+					buildmenu.add_command(label=str(i)+' '+config.get(i,'cost')+'M',command=partial(product,i))
 				if(types[i]=='people'):
-					prodmenu.add_command(label=i,command=partial(product,i))
+					prodmenu.add_command(label=str(i)+' '+config.get(i,'cost')+'M',command=partial(product,i))
 				if(types[i]=='bomb'):
-					buildmenu.add_command(label=i,command=partial(product,i))
+					buildmenu.add_command(label=str(i)+' '+config.get(i,'cost')+'M',command=partial(product,i))
 	
 
 
-
+win_flag=0
 def ml():
 	global ex_flag;global canvas;global units
-	global res;global l1
+	global res;global l1;global win_flag
 	while(1):
 		c=0
-		
+		e=0
+		win_flag=0
 		for i in units:
 			i.update()
 			
 			if(i.fname=='base' and i.hp>0):
 				c+=1
+			if(i.isenemy==1):
+				e+=1
 			if(i.hp<0):
 				
 				i.tod=1
 			else:
 				if(i.win==1):
-					print("YOU WIN!")
-					ex_flag=1
+					win_flag=1
+		if(win_flag==1 and e==0):
+			print("YOU WIN!")
+			ex_flag=1
 		for i in units:
 			if(i.tod==1):
 				canvas.delete(i.sprite)
@@ -394,7 +399,7 @@ def ml():
 		if(ex_flag==1):
 			return
 		ai()
-		l1['text']=str(res)+' '+str(e_res)
+		l1['text']=str(res)+'M '+str(e_res)+'E'
 		root.update()
 		sleep(0.005)
 
