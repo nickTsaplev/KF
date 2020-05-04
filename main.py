@@ -25,7 +25,7 @@ e_res=0;
 enec=1;
 ex_flag=0
 
-
+types=dict()
 root = Tk()
 root.geometry('500x500')
 config=configparser.ConfigParser()
@@ -418,7 +418,8 @@ root.bind('<Motion>', b2)
 
 root.bind('<Button-3>', b3)
 
-
+for i in config.sections():
+	types[i]=config.get(i,'type')
 root.protocol("WM_DELETE_WINDOW", on_closing)
 spenemy()
 ml()
